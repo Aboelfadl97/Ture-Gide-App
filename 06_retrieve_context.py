@@ -1,58 +1,65 @@
 """
 06_retrieve_context.py
 
-Load the existing Chroma vector database
-and retrieve the most relevant chunks.
+Retrieve relevant context from ChromaDB.
+If the database does not exist, create it automatically.
 """
 
-from pathlib import Path
 from importlib import import_module
+from pathlib import Path
 from typing import List
 
 from langchain_core.documents import Document
-from langchain_chroma import Chroma
 
 
 CHROMA_DB_PATH = Path("chroma_db")
-COLLECTION_NAME = "digital_notes"
 
 
-def load_vector_store() -> Chroma:
+vector_store_module = import_module(
+    "05_create_chroma_store"
+)
+
+create_vector_store = (
+    vector_store_module.create_vector_store
+)
+
+load_existing_vector_store = (
+    vector_store_module.load_existing_vector_store
+)
+
+
+_vector_store = None
+
+
+def get_vector_store():
     """
-    Load the existing Chroma vector database.
-
-    Returns:
-        Chroma:
-            The loaded vector store.
+    Load ChromaDB or create it automatically
+    when it does not exist.
     """
 
-    if not CHROMA_DB_PATH.exists():
-        raise FileNotFoundError(
-            "The Chroma database does not exist. "
-            "Run 05_create_chroma_store.py first."
+    global _vector_store
+
+    if _vector_store is not None:
+        return _vector_store
+
+    if CHROMA_DB_PATH.exists():
+        print("Loading existing Chroma database...")
+
+        _vector_store = (
+            load_existing_vector_store()
         )
 
-    # Dynamic import because the filename
-    # starts with a number.
-    vector_module = import_module(
-        "04_vector_representation"
-    )
+    else:
+        print(
+            "Chroma database not found. "
+            "Creating it automatically..."
+        )
 
-    get_embedding_model = (
-        vector_module.get_embedding_model
-    )
+        _vector_store = create_vector_store(
+            delete_existing=False
+        )
 
-    embedding_model = get_embedding_model()
-
-    vector_store = Chroma(
-        persist_directory=str(
-            CHROMA_DB_PATH
-        ),
-        embedding_function=embedding_model,
-        collection_name=COLLECTION_NAME,
-    )
-
-    return vector_store
+    return _vector_store
 
 
 def retrieve_context(
@@ -60,17 +67,17 @@ def retrieve_context(
     k: int = 4
 ) -> List[Document]:
     """
-    Retrieve the top-k most relevant chunks.
+    Retrieve relevant document chunks.
 
     Args:
         query:
-            The user's question.
+            User question.
 
         k:
             Number of chunks to retrieve.
 
     Returns:
-        List of relevant LangChain Documents.
+        List of relevant LangChain documents.
     """
 
     if not query or not query.strip():
@@ -78,33 +85,22 @@ def retrieve_context(
             "The query cannot be empty."
         )
 
-    if k <= 0:
-        raise ValueError(
-            "k must be greater than zero."
-        )
-
-    vector_store = load_vector_store()
+    vector_store = get_vector_store()
 
     results = vector_store.similarity_search(
         query=query.strip(),
-        k=k
+        k=k,
     )
 
     return results
 
 
-def print_results(
+def display_results(
     documents: List[Document]
-) -> None:
+):
     """
-    Print retrieved chunks with metadata.
+    Display retrieved documents in terminal.
     """
-
-    if not documents:
-        print(
-            "No relevant documents were found."
-        )
-        return
 
     print("=" * 60)
     print(
@@ -125,16 +121,13 @@ def print_results(
             "page_number"
         )
 
-        # Fallback if page_number was not saved
         if page_number is None:
-            original_page = document.metadata.get(
+            page = document.metadata.get(
                 "page"
             )
 
-            if original_page is not None:
-                page_number = int(
-                    original_page
-                ) + 1
+            if page is not None:
+                page_number = int(page) + 1
             else:
                 page_number = "Unknown"
 
@@ -145,37 +138,31 @@ def print_results(
 
         print(f"\nResult {index}")
         print("-" * 60)
-
         print(document.page_content)
 
         print("\nMetadata")
         print("-" * 60)
-
         print(f"Source: {source}")
         print(f"Page: {page_number}")
-        print(
-            f"Chunk Index: {chunk_index}"
-        )
+        print(f"Chunk Index: {chunk_index}")
 
         print("=" * 60)
 
 
 def main():
-    """
-    Test context retrieval from the terminal.
-    """
-
     try:
-        question = input(
+        query = input(
             "Ask a question: "
         ).strip()
 
         documents = retrieve_context(
-            query=question,
+            query=query,
             k=4
         )
 
-        print_results(documents)
+        display_results(
+            documents
+        )
 
     except Exception as error:
         print("=" * 60)
