@@ -29,13 +29,6 @@ def create_chunks(
 ) -> List[Document]:
     """
     Split documents into smaller overlapping chunks.
-
-    Args:
-        documents:
-            Cleaned LangChain documents.
-
-    Returns:
-        List of chunked LangChain documents.
     """
 
     if not documents:
@@ -61,28 +54,44 @@ def create_chunks(
         chunk.metadata["chunk_index"] = chunk_index
 
         if "page_number" not in chunk.metadata:
-            original_page = chunk.metadata.get("page")
+            original_page = chunk.metadata.get(
+                "page"
+            )
 
             if original_page is not None:
                 chunk.metadata["page_number"] = (
                     int(original_page) + 1
                 )
             else:
-                chunk.metadata["page_number"] = "Unknown"
+                chunk.metadata["page_number"] = (
+                    "Unknown"
+                )
 
     return chunks
 
 
 def main():
     """
-    Test document preprocessing and chunking.
+    Test the complete chunking process.
     """
 
     try:
-        documents = preprocess_documents()
+        documents_module = import_module(
+            "01_documents"
+        )
+
+        load_documents = (
+            documents_module.load_documents
+        )
+
+        documents = load_documents()
+
+        cleaned_documents = preprocess_documents(
+            documents
+        )
 
         chunks = create_chunks(
-            documents
+            cleaned_documents
         )
 
         print("=" * 50)
@@ -96,6 +105,7 @@ def main():
             print(f"\nChunk {index}")
             print("-" * 50)
             print(chunk.page_content[:500])
+
             print("\nMetadata:")
             print(chunk.metadata)
 
