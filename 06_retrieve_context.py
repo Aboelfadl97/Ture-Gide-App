@@ -167,21 +167,39 @@ def get_bm25(
 
 # الفانكشن دي بتفتح قاعدة البيانات الحالية وبتسيبها في الذاكرة لتقليل وقت التحميل.
 def get_vector_store():
-    """بفتح قاعدة البيانات الحالية وأحتفظ بيها في الذاكرة."""
+    """بفتح قاعدة البيانات أو ببنيها لو مش موجودة."""
 
     global _vector_store
 
     if _vector_store is None:
 
-        if not CHROMA_DB_PATH.exists():
+        if CHROMA_DB_PATH.exists():
 
-            raise FileNotFoundError(
+            print(
+                "Loading existing Chroma database..."
+            )
+
+            _vector_store = (
+                load_existing_vector_store()
+            )
+
+        else:
+
+            print(
                 "Chroma database not found."
             )
 
-        _vector_store = (
-            load_existing_vector_store()
-        )
+            print(
+                "Creating Chroma database..."
+            )
+
+            _vector_store = (
+                create_vector_store(
+                    chunk_size=DEFAULT_CHUNK_SIZE,
+                    chunk_overlap=DEFAULT_CHUNK_OVERLAP,
+                    delete_existing=False
+                )
+            )
 
     return _vector_store
 
