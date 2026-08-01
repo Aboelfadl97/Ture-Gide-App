@@ -1,0 +1,12 @@
+﻿question,expected_answer,relevant_pages
+"What is data analytics?","Data analytics is the process of examining, cleaning, transforming, and interpreting complex datasets to extract valuable insights, draw conclusions, and support decision-making.","4"
+"Why is data analytics important for businesses?","Data analytics helps businesses optimize performance, reduce costs, make better data-driven decisions, improve customer service, achieve efficient operations, and support effective marketing.","2"
+"What are the four major types of data analytics?","The four major types are predictive analytics, descriptive analytics, prescriptive analytics, and diagnostic analytics.","6"
+"What is predictive analytics?","Predictive analytics uses current and historical data and statistical techniques to determine probable outcomes and make predictions about future events.","7"
+"What is descriptive analytics?","Descriptive analytics analyzes past events and historical performance to understand what happened and the causes of past success or failure.","7"
+"What is prescriptive analytics?","Prescriptive analytics predicts future outcomes and suggests decision options or actions to take advantage of opportunities or mitigate risks.","7"
+"What is diagnostic analytics?","Diagnostic analytics uses historical data to identify dependencies and patterns and understand the causes of a problem.","8"
+"What are the three types of digital data?","The three types of digital data are structured data, semi-structured data, and unstructured data.","15"
+"What is data collection?","Data collection is the systematic process of gathering and measuring information on variables of interest for analysis, decision-making, and drawing conclusions.","17"
+"What is data preprocessing?","Data preprocessing is the cleaning, transforming, and integrating of data to make it ready for analysis and improve its quality.","19"
+
